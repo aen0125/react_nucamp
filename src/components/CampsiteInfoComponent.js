@@ -6,31 +6,6 @@ import { Control, LocalForm, Errors } from 'react-redux-form';
 const maxLength = len => val => !val || (val.length <= len);
 const minLength = len => val => val && (val.length >= len);
 
-function CampsiteInfo(props) {
-    if (props.campsite) {
-        return (
-            <div className="container">
-                <div className="row">
-                    <div className="col">
-                        <Breadcrumb>
-                            <BreadcrumbItem><Link to="/directory">Directory</Link></BreadcrumbItem>
-                            <BreadcrumbItem active>{props.campsite.name}</BreadcrumbItem>
-                        </Breadcrumb>
-                        <h2>{props.campsite.name}</h2>
-                        <hr />
-                    </div>
-                </div>
-                <div className="row">
-                    <RenderCampsite campsite={props.campsite} />
-                    <RenderComments comments={props.comments} />
-                </div>
-            </div>
-        );
-    }
-
-    return <div/>;
-}
-
 function RenderCampsite({campsite}) {
     return (
         <div className="col-md-5 m-1">
@@ -44,7 +19,7 @@ function RenderCampsite({campsite}) {
     );
 }
 
-function RenderComments({comments}) {
+function RenderComments({comments, addComment, campsiteId}) {
     if (comments) {
         return (
             <div className="col-md-5 m-1">
@@ -57,7 +32,7 @@ function RenderComments({comments}) {
                         </div>
                     );
                 })}
-                <CommentForm />
+                <CommentForm campsiteId={campsiteId} addComment={addComment} />
             </div>
         );
     }
@@ -83,14 +58,16 @@ class CommentForm extends Component {
     }
 
     handleSubmit(values) {;
-        alert(`rating: ${values.rating}, author: ${values.author}, text: ${values.text}`);
         this.toggleModal();
+        this.props.addComment(this.props.campsiteId, values.rating, values.author, values.text);
     }
 
     render() {
         return (
             <div>
-                <Button outline onClick={this.toggleModal}><i className="fa fa-pencil fa-lg" /> Submit Comment</Button>
+                <Button outline onClick={this.toggleModal}>
+                    <i className="fa fa-pencil fa-lg" /> Submit Comment
+                </Button>
                 <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
                     <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
                     <ModalBody>
@@ -108,11 +85,11 @@ class CommentForm extends Component {
                             <div className="form-group"> 
                                 <Label htmlFor="author">Your Name</Label>                   
                                 <Control.text model=".author" name="author" id="author" 
-                                placeholder="Your Name"
-                                className="form-control"
-                                validators={{
-                                    minLength: minLength(2),
-                                    maxLength: maxLength(15)
+                                    placeholder="Your Name"
+                                    className="form-control"
+                                    validators={{
+                                        minLength: minLength(2),
+                                        maxLength: maxLength(15)
                                 }}
                                 />
                                 <Errors
@@ -139,5 +116,33 @@ class CommentForm extends Component {
     }
 }
 
+function CampsiteInfo(props) {
+    if (props.campsite) {
+        return (
+            <div className="container">
+                <div className="row">
+                    <div className="col">
+                        <Breadcrumb>
+                            <BreadcrumbItem><Link to="/directory">Directory</Link></BreadcrumbItem>
+                            <BreadcrumbItem active>{props.campsite.name}</BreadcrumbItem>
+                        </Breadcrumb>
+                        <h2>{props.campsite.name}</h2>
+                        <hr />
+                    </div>
+                </div>
+                <div className="row">
+                    <RenderCampsite campsite={props.campsite} />
+                    <RenderComments 
+                        comments={props.comments} 
+                        addComment={props.addComment}
+                        campsiteId={props.campsite.id}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    return <div/>;
+}
 
 export default CampsiteInfo;
